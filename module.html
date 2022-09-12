@@ -1,0 +1,401 @@
+<!DOCTYPE HTML>
+<!--
+	Photon by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Photon by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/m1ain.css" />
+		<noscript><link rel="stylesheet" href="assets/css/n1oscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Header -->
+			<section id="header">
+				<div class="inner">
+					<h1><strong>Module 1</strong>
+					</h1>
+					<p style="font-size: x-large;">In this assignment we will try to gather a wide range of data and prep them for future assignments.</p>
+					<p style="font-size: x-large;"> I have choosen Football(soccer) as my topic and I plan to analyze different aspects of it like, the current trend among the people who follow football, going through the stats of the players, analyzing match results to predict future fixtures,etc.</p>
+				</br>
+			</br>
+					<ul>
+						<a href="index.html" class ="button">Home</a>
+					</ul>
+					<ul class="actions special">
+						<li><a href="#one" class="button scrolly">Let's Begin</a></li>
+					</ul>
+				</div>
+			</section>
+
+		<!-- One -->
+			<section id="one" class="main style1">
+				<div class="container">
+					<div class="row gtr-150">
+						
+							<header class="major">
+								<h2>How to use Twitter Api to gather tweets<br />
+								</h2>
+							</header>
+							<p style="font-size: large;">Twitter, like many other sites and applications, allows us to view and analyze some of their data. When using an API, it is often necessary to register, to get one or more keys (passcodes), and to understand the endpoints, parameters, options, documentation, limitations, and other details. This page will offer a tutorial specifically to help you to get started using Twitter. You will learn that you must get a Twitter Developer Account and that there are several other steps to follow. Unlike some APIs, Twitter is a but more complicated and involved. Be patient 🙂. Finally, when requesting a Twitter Dev account, it helps to use your .edu email if you have one.
+							</br>
+								STEP 1: Notice the URL – you can start here and read.</br>
+								<a href="https://developer.twitter.com/en" > https://developer.twitter.com/en </a> </br>
+								To go more directly, use the following: </br>
+								<a href="https://developer.twitter.com/en/portal/dashboard">  https://developer.twitter.com/en/portal/dashboard </a> </br>
+								
+								</p>
+						
+					</div>
+				</div>
+			</section>
+
+		<!-- Two -->
+			<section id="two" class="main style2">
+				<div class="container">
+					<div class="row gtr-150">
+						
+							<header class="major">
+								<h2>Twitter API in Python<br/>
+								</h2>
+							</header>
+							<p></p>
+							<p>Once you have access to the twitter developer account you should also have the api key and the secret api key. From the dashboard go to your project and then got to Keys and tokens tab, over here you will be able to generate the access token and secret. Now you should be having all the 4 keys. Personally, I was getting a 403 status error when I ran the code. Which means that twitter was not allowing me to pull tweets. To overcome this I requested for an Elevated account. You can get this for free after answering a few more questions. After that  you should be able to pull tweets through the API. </p>
+							<img src="images/elevatedTwitter.JPG" width="1100px" height="400px">
+							
+							
+								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+		config.ini FIle
+
+		[twitter]
+
+		api_key= enter your key
+		api_key_secret= enter your key
+		
+		access_token= enter your key
+		access_token_secret= enter your key
+		
+		The python code
+		
+		# import the following packages
+		import tweepy
+		import configparser
+		import pandas as pd
+		import re
+
+		#read config to access the 4 keys
+		config = configparser.ConfigParser()
+		config.read('config.ini')
+
+		api_key = config['twitter']['api_key']
+		api_key_secret = config['twitter']['api_key_secret']
+
+		access_token = config['twitter']['access_token']
+		access_token_secret = config['twitter']['access_token_secret']
+
+		# authentication
+		auth = tweepy.OAuthHandler(api_key, api_key_secret)
+		auth.set_access_token(access_token,access_token_secret)
+
+		api = tweepy.API(auth)
+
+		# Creating an empty dataframe for storing the keyword with its tweet content
+		columns = ['keyword', 'content']
+		data = []
+
+		# here you can set the keyword for searching in twitter.
+		# The limit specifies how many tweets of one keyword is pulled.
+		key = ['football','nba']
+		limit = 100
+		for keywords in key:
+			tweets = tweepy.Cursor(api.search_tweets, q=keywords, count=100, tweet_mode='extended').items(limit)
+			for tweet in tweets:
+				data.append([keywords, tweet.full_text])
+
+		df = pd.DataFrame(data, columns=columns)
+		print(df)
+
+		# now we do some basic cleaning on the tweets pulled.
+		tweetClean = []
+		content = df['content'].tolist()
+
+		for TW in content:
+			singleTweet = []
+			TW=TW.replace("\n", " ")
+			TW=TW.replace(",", " ")
+			TW=re.sub(r"[^A-Za-z\-]", " ", TW)
+			for word in TW.split(' '):
+				if len(word) <= 3:
+					word = " "
+				singleTweet.append(word)
+			tweet_proc = " ".join(singleTweet)
+			tweetClean.append(tweet_proc)
+
+		# we drop the raw tweet and then replace it with the cleaned one.
+		n = df.columns[1]
+		df.drop(n, axis = 1, inplace=True)
+
+		df['content'] = tweetClean
+
+		# we now save the data frame as a csv file in our pc.
+		df.to_csv('TwitterApiCSV.csv', index=False)
+									
+								</textarea>
+							
+							<p></br>after running the code you should have a csv file in this format: <a href="TwitterApiCSV.csv">Cleaned Tweets</a> </p>
+							<p> <img src="images/twitterCSV.JPG" ></p>
+					</div>
+				</div>
+			</section>
+
+			<!-- One -->
+			<section id="one" class="main style1">
+				<div class="container">
+					<div class="row gtr-150">
+						
+							<header class="major">
+								<h2>Player Statistics Data<br />
+								</h2>
+							</header>
+							<p style="font-size: large;">I collected this file from Kaggle and it has a lot of stats on Football players from different leagues. The data consists of 143 columns which show the players performance in different aspects of the game. We will we be modifying the columns and only selecting the major stats that will help us to measure the players. 
+							</p>
+							<p style="font-size: large;">With this data i wanted to see some interesting facts like which age group of people are more dominating, are strikers more prone to score goals, which positions draw more fouls, checking which league has more offensive or defensive prowess, etc</p>
+				
+						
+					</div>
+				</div>
+			</section>
+
+		<!-- Two -->
+			<section id="two" class="main style2">
+				<div class="container">
+					<div class="row gtr-150">
+						
+							<header class="major">
+								<h2>Cleaning the data
+								</h2>
+							</header>
+							<div>
+								<p></p>
+								<p>Download link for the raw file : <a href="2021-2022FootballPlayerStats.csv">2021-2022FootballPlayerStats</a></p>														
+								<p><img src="images/2021-22RawData.JPG"></p>
+							</div>
+							<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+#Importing Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+#Loading the Data
+raw_data = pd.read_csv("2021-2022FootballPlayerStats.csv", sep = ';', encoding = 'ISO-8859-1')
+pd.set_option('display.max_columns', None)
+raw_data.head(5)
+				
+#Making a copy of data for cleaning
+player_stats = raw_data.copy()
+
+#checking for any null values
+player_stats.isnull().sum().sum()
+
+#The age and nation is null for a player, leaving it alone for now as it is not a very important factor for our analysis
+player_stats.columns[player_stats.isnull().any()].tolist()
+player_stats[player_stats.isnull().any(axis=1)]
+
+#Dropping some columns
+player_stats = player_stats.drop(['Rk', 'Born', 'PasAtt', 'Crs'], axis = 1)
+
+#Now we will modify the columns and select the ones we need and leave the remaining
+df_player_stats['Player'] = player_stats['Player']
+df_player_stats['Nation'] = player_stats['Nation']
+df_player_stats['Pos'] = player_stats['Pos']
+df_player_stats['Squad'] = player_stats['Squad']
+df_player_stats['Comp'] = player_stats['Comp']
+df_player_stats['Age'] = player_stats['Age']
+df_player_stats['MP'] = player_stats['MP']
+df_player_stats['G/90'] = player_stats['Goals']
+df_player_stats['G/Sh'] = player_stats['G/Sh']
+df_player_stats['PKGoals'] = ((player_stats['ShoPK'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['PKAttempted'] = ((player_stats['PKatt'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['Goals'] = ((player_stats['Goals'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['Pass'] = ((player_stats['PasTotAtt'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['PassCompleted'] = ((player_stats['PasTotCmp'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['PassComp%'] = ((df_player_stats['PassCompleted'] / df_player_stats['Pass']) * 100).round(2)
+df_player_stats['Assist'] = ((player_stats['Assists'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['Cross'] = ((player_stats['PasCrs'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['CrossCompleted'] = ((player_stats['CrsPA'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['CrossComp%'] = ((df_player_stats['CrossCompleted'] / df_player_stats['Cross']) * 100).round(2)
+df_player_stats['Tackle_Won'] = ((player_stats['TklWon'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['SucDribble'] = ((player_stats['DriSucc'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['Dribble'] = ((player_stats['DriAtt'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['DribbleComp%'] = ((df_player_stats['SucDribble'] / df_player_stats['Dribble']) * 100).round(2)
+df_player_stats['YCards'] = ((player_stats['CrdY'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['RCards'] = ((player_stats['CrdR'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['Fls'] = ((player_stats['Fls'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['Fld'] = ((player_stats['Fld'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['OGoals'] = ((player_stats['OG'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['AerWon'] = ((player_stats['AerWon'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['AerLost'] = ((player_stats['AerLost'] * player_stats['Min']) / 90).round(0).astype(int)
+df_player_stats['AerWon%'] = ((player_stats['AerWon'] / (player_stats['AerWon'] + player_stats['AerLost'])) * 100).round(2)
+
+df_player_stats.head(5)
+
+#Now that we have our table, lets do some simple analysis
+#Lets see The top 5 players with highest goal per 90 minutes ratio
+(df_player_stats[(df_player_stats.MP >= 20) & (df_player_stats.Pos != 'GK')].sort_values('G/90', ascending = 
+False).head(5).iloc[:,[0,1,2,3,4,5,7]].plot(y='G/90', x = 'Player', kind='bar', figsize =  [10,10], color = (0.2, 0.7, 0.5, 0.6)))
+
+#Top 5 teams with highest goals in 2021/22 season
+team_goals = df_player_stats.groupby(['Squad']).agg(Team_Goals = ('Goals', 'sum'))
+team_goals = pd.DataFrame(team_goals).reset_index()
+team_goals.sort_values('Team_Goals', ascending = False).head(5).plot(y='Team_Goals', x = 'Squad', kind='bar', figsize =  
+[10,10], color = ('red','orange','yellow','green','blue'))
+
+#Lets save this DataFrame into a csv so we can use it later for analysis
+df_player_stats.to_csv('21-22PlayerStats.csv')
+									
+								</textarea>
+								
+								<div>
+									<p> Top 5 players with highest goal per 90 minutes ratio.</p>
+									<div>
+										<img src="images/topG90.JPG" width="400" height="400" alt="" />
+									</div>
+								</div>
+								<div>
+									<p> Top 5 Teams with most goals in a season</p>
+									<div>
+										<img src="images/topTeamGoal.JPG" width="400" height="400" alt="" />
+									</div>
+								</div>
+								
+
+								<div>
+									<p style="font-size: x-large ;"></br>Cleaned Data should be like this</p>
+									<div>
+										<img src="images/2021-22CleanData.JPG">
+									</div>
+								<p>Here is a link to cleaned data:  <a href="21-22PlayerStats.csv">Player Stats</a></p>
+								</div>
+							 																
+					</div>
+				</div>
+			</section>
+
+			<section id="one" class="main style1">
+				<div class="container">
+					<div class="row gtr-150">
+						
+							<header class="major">
+								<h2>Results of premier league matches<br />
+								</h2>
+							</header>
+							<p style="font-size: large ;">This data set contains details of premier league games from 2020 to 2022. With the help of this data I plan to build a model to predict results of future fixtures.  </p>
+							<p style="font-size: large ;">We will create a labeled column called target which will tell us whether the home team won the match or lost/draw the match. We can use this to check the accuracy of our model.</p>											
+					</div>
+				</div>
+			</section>
+
+		<!-- Two -->
+			<section id="two" class="main style2">
+				<div class="container">
+					<div class="row gtr-150">
+						
+							<header class="major">
+								<h2>Match Data<br/>
+								</h2>
+							</header>
+							<p></br></br></br>Link to the Raw Data : <a href="matches.csv"> matches.csv </a></p>
+							<p><img src="images/MatchesRaw.JPG"></p>
+							
+							
+								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+import pandas as pd
+import numpy as np
+
+#Loading the dataset
+
+df = pd.read_csv("matches.csv", index_col = 0)
+df.shape
+
+# Inspecting the data
+df.head()
+df['team'].value_counts()
+
+# we see that 7 teams have played less than 70 matches when we expected to have only 6 teams.
+
+df[df['team']=='Liverpool']
+# We can see that for liverpool the match data is present only 2020/21 season and missing data for 2021/22 season.
+
+# checking the types of the data
+df.dtypes
+														
+# Convering data from object to datetime
+df["date"] = pd.to_datetime(df["date"])
+df.dtypes
+
+#  Creating venue_code column which will have either 0 or 1 value to specify an Away or Home game respectively.
+df["venue_code"] = df["venue"].astype("category").cat.codes
+df["venue_code"]
+
+# create opp_code column each opponent now has an unique code
+df["opp_code"] = df["opponent"].astype("category").cat.codes
+df["opp_code"]
+
+# Now lets create a target column which will show 1 for a win and 0 for a lose,draw.
+df["target"] = (df["result"] == "W").astype("int")
+df
+
+# plotting total no. of wins achieved by each team in two seasons
+np.choose(df['target'],[df['opponent'],df['team']]).value_counts().div(2).fillna(0).sort_values(ascending = 
+False).plot(kind="bar",color=(0.0,0.7,0.8,0.6) ,edgecolor='blue').set_ylabel('Total wins')			
+								</textarea>
+								<div>
+									<p style="font-size:x-large ;"></br>The below Image shows us the number of matches each team has won in descending order.</p>
+									<p><img  src="images/winsPerTeam.JPG" width="300px" height="300px"></p>
+								</div>
+								</br>
+								</br>
+								<div>
+									<p style="font-size:x-large ;">The cleaned Data should be looking like this</p>
+									<img src="images/MatchesEdit.JPG">
+								</div>
+					</div>
+				</div>
+			</section>
+
+		
+
+		<!-- Four -->
+			<section id="four" class="main style2 special">
+				
+			</section>
+
+		<!-- Footer -->
+			<section id="footer">
+				<div class="container">
+					<header class="major">
+						<h2>Acknowledgements</h2>
+					</header>
+					<p>
+						Dr. Ami Gates for the knowledge and resources.
+					</br>Kaggle.com for the Data.
+					</br>FBref.com for the Data.
+
+					</p>
+				</div>
+			</section>
+
+		<!-- Scripts -->
+			<script src="assets/js/j1query.min.js"></script>
+			<script src="assets/js/j1query.scrolly.min.js"></script>
+			<script src="assets/js/b1rowser.min.js"></script>
+			<script src="assets/js/b1reakpoints.min.js"></script>
+			<script src="assets/js/u1til.js"></script>
+			<script src="assets/js/m1ain.js"></script>
+
+	</body>
+</html>
