@@ -1,0 +1,312 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Clustering</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main2.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript2.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Home</a>
+						
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="module2.html">Introduction</a></li>
+							<li class="active"><a href="generic.html">Clustering</a></li>
+							<li><a href="generic2.html">ARM</a></li>
+							
+						</ul>
+						
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									
+									<h2>Clustering</h2>
+								</header>
+								<h2>analyses: Clustering</h2>
+								<h3>Data preprocessing:</h3>
+								<img src="images/2021-22CleanData.JPG" >
+								<p>This was the data that we obtained after cleaning the raw data in the last module. As our goal is to obtain and observe the players who had a great performance and impact offensively on the pitch we need to process the data further. We dont need the defensive attributes so we get rid of them. We dont need similar information like goals, goals/90 mins and so on, we can keep any one of them.</p>
+								<img src="images/fClust.JPG" >
+								<p>After cleaning we will obtain a dataset like this, then we can perform further analysis and use our models on this data</p>
+								<h3>Kmeans Clustering:</h3>
+								<p>It's one of the most popular unsupervised clustering algorithms. The objective of this algorithm is to group similar objects together. So, two objects in a cluster are more similar to each other than two objects from different clusters. We initially specify a number k, which refers to the number of clusters to be formed.</p>
+								<p>When we run a kmeans algorithm initiall k random centroids are created. Then the distance from each point to centroids is calculated. The closest ones are grouped together and form a cluster, then the centroid is recalculated by taking the average of all the points in that cluster. This process is repeated untill there's no more changes in the clusters.</p>
+								<h3>Hierarchical clustering:</h3>
+								<p>Hierarchical clustering is another type of clustering algorithm. Initially in this algorithm all objects are treated as a seperate cluster. Then there are two main steps that happen repeatedly:</br>1) It identifies the two closest clusters. </br>2) It then merges the two clusters into one.</br>This process is continued till all the clusters are merged together. A dendrogram is typically used to visualize a hierarchical clustering.</p>
+								<h3>DBSCAN:</h3>						
+								<p>DBSCAN stand for Density-Based Spatial Clustering of Applications with Noise. It is a unsupervised density-based clustering algorithm. The idea is that a cluster is a region of high point density, seperated from other such regions by low point density regions.</br>DBSCAN has two important parameters :</br>eps: also know as epsilon parameter. It is a distance measure that sets a maximum distance. All the points within that distance are considered as neighboring points.</br>min_sample: It is the number points that must be close (within the eps distance) to be considered as a cluster.</br>There are different types of points in a DBSCAN cluster output. Core points which are points that have the required no.of neighbors. Border points which dont have the required no. of neighbors but, it is close to a core point. And Noise point, a point which does not have the required no. of neighbors and also not close to any core points. It is considered as a outlier.</br>The algorithm starts by arbitrarily picking up a point and then visits all the points. If the required no. of neighbors within the eps distance is satisfied then a cluster is formed. The cluster is then expanded by recursively repeating the requirement calculation for each neighboring point. </p>
+								<h3>Distance metrics:</h3>
+								<p>There are different distance metrics that clustering algorithms can use to find the distance between two points. some of them are:</br></br>Euclidean distance: It was one of the most commonly used distance metrics and is suitable for many datasets aswell. It gives the straight line distance between to points. The formula to calculate is given by:</br> d = √[ (x
+									2
+									 – x
+									1
+									)^2 + (y
+									2
+									 – y
+									1
+									)^2]</br>Where x1,y1 and x2,y2 are the coordinates of the two points. Euclidean distance is usually the default distance metric for most algorithms, but in some cases when the dimensions are not comparable, one of them will hold more weightage on euclidean distance. In such cases we can normazlize the features so that the values will always be between 1 and 0 and then we can apply euclidean distance. </p>
+								<p>Manhattan distance: It is the sum of the absolute distance between two points in all dimensions. It is a straightforward way, It's formula is given by:</br>d = (x2-x1) + (y2-y1)</br>Manhattan distance is best preferred when we have high dimensional data. It gives better results than euclidean in such cases. In some cases when we have multiple dimensions, euclidean is preferred cause it will give the straight line distance, manhattan will find distances in horizontal or vertical dimensions ( like in a chess board where we can move vertically or horizontally). </p>
+								<p>Cosine distance: Cosine distance or cosine similarity is used to find similarity between two points/documents/vectors by measuring the angle between them. Smaller the angle more similar they are and vice versa. It's formula is given by: </br>Cosine similarity = (x*y)/( (√x*x)(√y*y) )</br>Cosine distance = 1 - Cosine similarity</br>Cosine similarity is generally used when the magnitude of the vectors do not matter because it uses the orientation of vectors to find similarity. It is often used with text data. It is also used in recommendation systems to recommend items based on likes and dislikes.  </p>
+								<p>In this analysis we will use different clusterring algorithms to analyze the top performers from all the leagues based on their performance in the last season.</p>
+								<h3>Coding:</h3>
+								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+from sklearn.cluster import KMeans
+
+# Lets's read the cleaned dataset of football player stats, which we had done in the last module
+df = pd.read_csv("21-22PlayerStats.csv")
+df.head()
+
+# Now lets filter our data set to get players who have played a good amount of matches,
+# and had contributed some goals and assists
+sub_df = df[(df.MP >= 25) & (df.Goals > 5) & (df.Assist > 1)]
+
+# there are a lot of unwanted stats for this analysis,
+# so we will select only the necessary ones.
+cdf = sub_df[["Player","Pos","Age","MP","Goals","Assist","PassComp%","CrossComp%","DribbleComp%"]]
+sns.countplot(cdf.Pos)
+plt.show()
+
+# upon inspection we can see that some players have unique positions,
+# so we shall rename those to generic ones.
+cdf['Pos'] = cdf['Pos'].replace({'FWMF':'FW','FWDF':'FW','MFFW':'MF','DFMF':'MF'})
+sns.countplot(cdf.Pos)
+plt.show()
+
+# Now lets plot a scatter plot to see Goals/Assists of each player.
+fig = px.scatter(cdf,x="Assist",y="Goals",color="Player",title="Goals Vs Assists")
+fig.update_traces(textposition='top center')
+fig.show()
+
+# Let's look at a 3d visualization of some important stats to check
+# which players had a solid performance on pitch last season.
+fig = px.scatter_3d(cdf,x="DribbleComp%",y="PassComp%",z="CrossComp%",color="Player",
+					title="Dribbling acc VS Key Pass accuracy VS Cross accuracy")
+fig.update_traces(textposition='top center')
+figsize=(18,8)
+fig.show()
+
+# lets start with kmean clustering
+
+# we shall take the necessary columns for analysis.
+X = cdf[["Goals","Assist"]]
+
+# ---------- ELBOW METHOD----------
+# wcss is the summation of squared distances from each point to the centroid in a cluster.
+# we will get the elbow plot when we plot wcss against the k values
+wcss = []
+for i in range(1,11):
+	kmeans = KMeans(n_clusters=i, init='k-means++', random_state=0)
+	kmeans.fit(X)
+	wcss.append(kmeans.inertia_)
+plt.plot(range(1,11), wcss,)
+plt.title('The Elbow Method')
+plt.xlabel('no of clusters')
+plt.ylabel('wcss')
+plt.show()
+
+# Now we shall run kmeans with number of clusters = 4 and plot the output
+kmeansmodel = KMeans(n_clusters=4 , init='k-means++', random_state=0)
+y_kmeans= kmeansmodel.fit_predict(X)
+labels = kmeansmodel.labels_
+cdf["label"]=labels
+cdf.loc[cdf['label'] == 3, 'Category'] = 'Star Performer'
+cdf.loc[cdf['label'] == 2, 'Category'] = 'Tornado'
+cdf.loc[cdf['label'] == 1, 'Category'] = 'Contributor'
+cdf.loc[cdf['label'] == 0, 'Category'] = 'Magician'
+fig = px.scatter(cdf,x="Assist",y="Goals",color="Category",title="K-mean clustering of Assists VS Goals")
+fig.update_traces(textposition='top center')
+fig.show()
+
+# Running kmeans with number of clusters = 3 and plot the output
+kmeansmodel2 = KMeans(n_clusters=3 , init='k-means++', random_state=0)
+y_kmeans= kmeansmodel2.fit_predict(X)
+labels = kmeansmodel2.labels_
+cdf["km2label"]=labels
+cdf.loc[cdf['km2label'] == 2, 'Categorykm2'] = 'cluster 3'
+cdf.loc[cdf['km2label'] == 1, 'Categorykm2'] = 'cluster 2'
+cdf.loc[cdf['km2label'] == 0, 'Categorykm2'] = 'cluster 1'
+fig = px.scatter(cdf,x="Assist",y="Goals",color="Categorykm2",title="K-mean clustering with no_of_clusters = 3 for Assists VS Goals")
+fig.update_traces(textposition='top center')
+fig.show()
+
+# Running kmeans with number of clusters = 2 and plot the output
+kmeansmodel3 = KMeans(n_clusters=2 , init='k-means++', random_state=0)
+y_kmeans= kmeansmodel3.fit_predict(X)
+labels = kmeansmodel3.labels_
+cdf["km3label"]=labels
+cdf.loc[cdf['km3label'] == 1, 'Categorykm3'] = 'cluster 2'
+cdf.loc[cdf['km3label'] == 0, 'Categorykm3'] = 'cluster 1'
+fig = px.scatter(cdf,x="Assist",y="Goals",color="Categorykm3",title="K-mean clustering with no_of_clusters = 2 for Assists VS Goals")
+fig.update_traces(textposition='top center')
+fig.show()
+
+#importing libraries for hierarchical clustering
+
+from sklearn.cluster import AgglomerativeClustering
+from sklearn import preprocessing 
+import scipy.cluster.hierarchy as sch
+import scipy.cluster.hierarchy as hc
+from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import ward, dendrogram
+
+# lets visualize the data using dendogram. 
+plt.figure(figsize =(30, 18))
+plt.title('Hierarchical Clustering')
+dendro = hc.dendrogram((hc.linkage(X, method ='ward')))
+
+# Hierarchical clustering using euclidean distance metric
+MyHC = AgglomerativeClustering(n_clusters=4, affinity='euclidean', linkage='ward')
+FIT=MyHC.fit(X)
+HC_labels = MyHC.labels_
+print(HC_labels)
+# plotting the results
+cdf["labeleuc"]=HC_labels
+cdf.loc[cdf['labeleuc'] == 3, 'Cluster'] = '3'
+cdf.loc[cdf['labeleuc'] == 2, 'Cluster'] = '2'
+cdf.loc[cdf['labeleuc'] == 1, 'Cluster'] = '1'
+cdf.loc[cdf['labeleuc'] == 0, 'Cluster'] = '0'
+fig = px.scatter(cdf,x="Assist",y="Goals",color="Cluster",title="Hierarchical clustering with euclidean distance of Assists VS Goals")
+fig.update_traces(textposition='top center')
+fig.show()
+
+# Hierarchical clustering using manhattan distance metric
+ManH = AgglomerativeClustering(n_clusters=4, affinity='manhattan', linkage='complete')
+FIT=ManH.fit(X)
+MH_labels = ManH.labels_
+print(MH_labels)
+# plotting the results
+cdf["labelman"]=MH_labels
+cdf.loc[cdf['labelman'] == 3, 'ClusterMan'] = '3'
+cdf.loc[cdf['labelman'] == 2, 'ClusterMan'] = '2'
+cdf.loc[cdf['labelman'] == 1, 'ClusterMan'] = '1'
+cdf.loc[cdf['labelman'] == 0, 'ClusterMan'] = '0'
+fig = px.scatter(cdf,x="Assist",y="Goals",color="ClusterMan",title="Hierarchical clustering with manhattan distance of Assists VS Goals")
+fig.update_traces(textposition='top center')
+fig.show()
+
+# Hierarchical clustering using cosine distance metric
+cosH = AgglomerativeClustering(n_clusters=4, affinity='cosine', linkage='complete')
+FIT=cosH.fit(X)
+cosH_labels = cosH.labels_
+print(cosH_labels)
+# plotting the results
+cdf["labelcos"]=cosH_labels
+cdf.loc[cdf['labelcos'] == 3, 'ClusterCos'] = '3'
+cdf.loc[cdf['labelcos'] == 2, 'ClusterCos'] = '2'
+cdf.loc[cdf['labelcos'] == 1, 'ClusterCos'] = '1'
+cdf.loc[cdf['labelcos'] == 0, 'ClusterCos'] = '0'
+fig = px.scatter(cdf,x="Assist",y="Goals",color="ClusterCos",title="Hierarchical clustering with cosine distance of Assists VS Goals")
+fig.update_traces(textposition='top center')
+fig.show()
+
+# importing libraries for DBSCAN clustering
+from sklearn.cluster import DBSCAN
+
+# DBSCAN clustering
+dfDBSCAN = DBSCAN(eps=2,min_samples=3,metric='euclidean')
+dfDBSCAN.fit_predict(X)
+dbscan_label = dfDBSCAN.labels_
+print(dbscan_label)
+
+# plotting the results
+cdf["labeldb"]=dbscan_label
+cdf.loc[cdf['labeldb'] == 0, 'ClusterDB'] = '0'
+cdf.loc[cdf['labeldb'] == 2, 'ClusterDB'] = '2'
+cdf.loc[cdf['labeldb'] == 1, 'ClusterDB'] = '1'
+#cdf.loc[cdf['labeldb'] == 3, 'ClusterDB'] = '3'
+cdf.loc[cdf['labeldb'] == -1, 'ClusterDB'] = 'outlier'
+fig = px.scatter(cdf,x="Assist",y="Goals",color="ClusterDB",title="DBSCAN of Assists VS Goals")
+fig.update_traces(textposition='top center')
+fig.show()
+								</textarea>
+							 	</br></br>
+								<h3>Results:</h3>
+								<img src="images/positions.JPG" >
+								<p>This image shows us the players after renaming some of the unique positions into more generic ones. We can observe that most of the players who contributed to the scoresheets are forwards.</p>
+								</br>
+								<img src="images/ga.JPG" >
+								<p>In this we can see the players in a scatter plot. Most of the players are crowded, but there are a few who stand out. Robert Lewandoski leads the pack with the highest no.of goals being 35, while both Mbappe and thomas muller have 18 assists. We can see that mbappe had a solid performance last season by scoring and assisting. </p>
+								</br><img src="images/dkc3d.JPG" >
+								<p>This 3d plot gives us an understanding of how impacting the players where on the pitch. Player like Jorginho(bottom left of the image) who is a midfielder will have a lesser cross% but he had high passing% and dribble% which can have a high impact on the game. </p>
+								</br>
+								<img src="images/elbow.JPG" >
+								<p>This image gives us the elbow plot for our data. we can choose the number of clusters. I have chosen n as 4.</p>
+								</br>
+								<img src="images/km4.JPG" >
+								<p>In this image we can see 4 clusters being formed. It clusters based on how many goals or how many assists a playe was able to get.</p>
+								</br>
+								<img src="images/km3.JPG" >
+								<p>When we do the clustering with n = 3, we can see that the data has been split horizontally. Previously the green cluster which represented players with high no.of assists has been split into the red and blue clusters.</p>
+								</br>
+								<img src="images/km2.JPG" >
+								<p>This image shows kmeans clustering when n=2.</p>
+								</br>
+								<img src="images/dendo.JPG" >
+								<p>This is a dendrogram used to represent a hierarchical clustering. In this the closest objects are grouped together first. upon joining all objects we can see an image like above. We can see like 4 clusters forming in this image. If we draw a horizontal line from y-axis = 30, we will slice through 4 lines creating 4 clusters.</p>
+								</br>
+								<img src="images/hceuc.JPG" >
+								<p> This image shows hierarchical clustering usiong euclidean distance metric. euclidean distance calculates the distance between two points by aggregating the squared difference for each variable. we can observe that this image is very similar to the output we got from k-means clustering with n=4 as kmeans uses euclidean aswell.</p>
+								</br>
+								<img src="images/hcman.JPG" >
+								<p> The manhattan distance is calculated by aggregating the absolute difference for each variable. We can see that we dont get very good clusters, typically manhattan is appropriate to use when the different dimensions are not comparable. In our case it is better to go with euclidean  distance.</p>
+								</br>
+								<img src="images/hccos.JPG" >
+								<p>This image shows us hierarchical clustering by using cosine distance metric. In this metric we don't calculate the distance between two points but we calculate the degree of angle between them. Cosine is generally used when we dont care for the magnitude of the vectors. i.e when the frequencies of our objects are not too important. but in our case the frequency is important.</p>
+								</br>
+								<img src="images/dbscan.JPG" >
+								<p>This image gives us the output of dbscan clusterring. dbscan has two parameters that we need to provide values to. Those are eps(max distance for one point to be considered as a neighbor to other) and min_samples(The number of points that must be a neighbor for the point to become a core point). For the epsilon parameter(eps) we need to experiment by using differet values. For min_samples we need to use our domain knowledge. I have gone with 3, because i wanted atleast 3 other players to be close to form a group. Bottom left of the image seems to form a dense cluster where the players have a similar g/a ratio. The red dots are outliers. These are players who have had high goals or assists or both. Since it is tough to get more goals or assists, there are less players around them to form a group. </p>
+								</br></br>
+								<h3>Conclusion:</h3>
+								<p>After analyzing the dataset and running different clustering models on it we were able to find some key information. We can see that out of 2921 players there were only 186 players who had played more than 25 matches while scoring more than 5 goals and having 2 or more assists. Almost 75% of those players are forwards or Wingers. As goal scoring is mainly done by the front liners it is expected to have more attackers to score or assist.</p>
+								<p>Upon further visualization we can see that the majority of players form a dense group as shown by the dbscan results. And there are a few players who topped or had a great performance in the scoring charts or assist charts. By rating we might give Kylian Mbappe as the overall best player in the last season has he has topped the assist chart with 18 assists and is the second highest scorer with 28 goals. With great performances in both departments he deserves to be highly rated.</p>
+								<p>From the kmeans clustering with n=4 or with the hierarchical clustering with euclidean distance outputs which are similar we can see 4 clusters. I have named the clusters to make it simple:</br>Star performer: These are players who's name is always on the score sheet and have had high contributions by scoring goals.</br>Magician: These are players who set up for their teammates and contribute more through assists.</br>Tornado: They have average contributions through goals and assists</br>Contributer: These are plays who have low contributions through goals and assists.</br>
+								This information can be very usefull for managers or scout teams. If a team already has a star performer then they can keep a lookout for a magician who can compliment their star. A team with too many star performers will likey face troubles as the ego's of the players might class. So teams can try to find a tornado or contributor to fill in the gaps or to be used as a substitute.</p>
+							</section>
+
+					</div>
+
+				
+
+				<!-- Copyright -->
+					<div id="copyright">
+
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery2.min.js"></script>
+			<script src="assets/js/jquery.scrollex2.min.js"></script>
+			<script src="assets/js/jquery.scrolly2.min.js"></script>
+			<script src="assets/js/browser2.min.js"></script>
+			<script src="assets/js/breakpoints2.min.js"></script>
+			<script src="assets/js/util2.js"></script>
+			<script src="assets/js/main2.js"></script>
+
+	</body>
+</html>

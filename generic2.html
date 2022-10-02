@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>ARM</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main2.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript2.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Home</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="module2.html">Introduction</a></li>
+							<li><a href="generic.html">Clustering</a></li>
+							<li class="active"><a href="generic2.html">ARM</a></li>
+
+							
+						</ul>
+						
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1>Association Rule Mining
+									</h1>
+								</header>
+								<h2>Analyses: ARM</h2>
+								<h3>Data preprocessing:</h3>
+								<img src="images/armData1.JPG" >
+							</br></br>
+								<p>Using the twitter API method to pull tweets from module 1, this dataset was generated. The dataset contains 300 tweets, and further cleaning is required to remove some unwanted words. The code for the cleaning process is included below. After cleaning the dataset will look like the below image, and then we can run association rule mining algorithms on it. </p>
+								<img src="images/armData2.JPG" >
+								<h3>ARM:
+								</h3>
+								<p> Association rule mining is usually used to find relationships/associations between words, item sets in large datasets. It shows how frequently an itemset occurs. Usually tranascation data is given as an input for this algorithm.</br>
+								An example for this can be the market basket analysis, in which we have a sample of products purchased by customer in transaction format. Using ARM we can find associations between the products and see which two products are bought together frequently.</br>
+								The association rule has 2 parts, antecedent and consequent. antecedent is the item which is found in the dataset and consequent is the item found with the antecedent. For example, People who buy diapers often tend to buy beer aswell. Here diaper is the antecedent and beer is the consequent.</p>
+								<img src="images/marbasket.JPG" >
+								<h3>Rule evaluation metrics:</h3>
+								<p>Support: It is the percentage of number of transactions which includes the itemset from all transactions. It shows how popular the itemset is. It can be calculated by:</br> Support = no.of({x}->{Y}) / (total transactions)  </p>
+								<p>confidence: This measure says how many times Y(consequent) has occured when X(antecedent) has also occured. It is measured by the ratio of how many times X and Y have appeared together to X appearing alone. It can be calculated by: </br> Confidence = Support(X,Y) / Support(X) </p>
+								<p>Lift: It shows how often Y is purchade when X was also purchased, while also considering the popularity of Y. If the value of lift is greater than 1 then it implies that X and Y appear together often. If it is less than one then it means X and Y are unlikely to appear together. It can be calculated by:</br> Lift = Support(X,Y) / ( Support(X) * Support(Y) )   </p>
+								<p>Taking the above market basket analysis let's try to calculate support, confidence, and lift : 
+								</br></br>Support for {Diaper}->{Beer} : </br> sup = 3 / 5 = 0.60 (60%) 
+								</br></br>Confidence for {Diaper}->{Beer} : </br> conf = (3/5) / (4/5) = 0.75 (75%)
+								</br></br>Lift for {Diaper}->{Beer} : </br> lift = (3/5) / ( (4/5) * (3/5) ) = 1.25 </p> 
+								<h2>Coding:</h2>
+								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+library(arules)
+library(arulesViz)
+
+#reading in the transaction data which we obtained from module 1
+df <- read.csv("C:\\Users\\Mazino\\Desktop\\TwitterApi\\TwitterAPI.csv")
+
+# To check the most frequent items
+TweetT<-read.transactions("C:\\Users\\Mazino\\Desktop\\TwitterApi\\mdR.csv",format = 'basket', sep = ',', rm.duplicates = TRUE)
+sampleT <- sample(TweetT)
+summary(sampleT)
+
+Tweets <- df2
+
+# replacing the unwanted common repeating words
+Tweets[Tweets == "t.co"] <- ""
+Tweets[Tweets == "rt"] <- ""
+Tweets[Tweets == "http"] <- ""
+Tweets[Tweets == "https"] <- ""
+
+#Cleaning using grepl, every row in eac column
+mydf<-NULL
+mydf2<-NULL
+mydf3<-NULL
+for ( i in 1:ncol(TweetDF)){
+  #each list is a column of logicals
+  myList=c() 
+  # for digits
+  myList=c(myList,grepl("[[:digit:]]", Tweets[[i]]))
+  
+  #for small words
+  myList2=c()
+  myList2=c(myList2,grepl("[a-z]{4,}", Tweets[[i]]))
+  
+  #for large words
+  myList3=c()
+  myList3=c(myList3,grepl("[a-z]{12,}", Tweets[[i]]))
+  
+  #creating a logical df
+  mydf<-cbind(mydf,myList)
+  mydf2<-cbind(mydf2,myList2)
+  mydf3<-cbind(mydf3,myList3)
+}
+
+#Replacing the values with blank
+Tweets[mydf] <- ""
+Tweets[!mydf2] <- ""
+Tweets[mydf3] <- ""
+
+(head(Tweets))
+
+# Lets save the cleaned transaction data and reload it to perform ARM.
+write.csv(TweetDF,"C:\\Users\\Mazino\\Desktop\\TwitterMining\\cleanMdrPython.csv", row.names = FALSE)
+finalDF<-read.transactions("C:\\Users\\Mazino\\Desktop\\TwitterMining\\cleanMdrPython.csv", rm.duplicates = TRUE, format = "basket", sep=",")
+
+# Running the apriori algorithm to get the associations
+rules = apriori(data=finalDF, parameter = list(support = 0.0004, confidence = 0.0002,minlen=2,maxlen=6))
+
+#inspecting the rules based on support
+inspect(sort(rules, by = 'support', decreasing=TRUE)[1:10])
+
+# Plotting a graph to visualize the rules
+sortedRules<- sort(rules, by="confidence", decreasing = TRUE)
+plot(sortedRules[1:15], method="graph", engine="interactive", shading="confidence")
+
+# Plotting a grouped matrix-based visualization
+plot(sortedRules_sup[1:15], method="grouped", shading="confidence")
+								</textarea>
+								</br>
+								<h2>Results:</h2>
+								<h3>Rules for support:</h3>
+								<img src="images/supRules.JPG" >
+								<p>These are the 15 rules we obtained when sorted based on support. The highest support percentage is 12.9%, so the tweets we gathered have varied words and very less repeating words. In our sample of 300 tweets, we can see that most of the tweets are about premier league, queen elizabeth and erling haaland. </p>
+								<img src="images/armSup1.JPG" >
+								<img src="images/armSup2.JPG" >
+							</br></br>
+								<h3>Rules for confidence:</h3>
+								<img src="images/confRules.JPG" >
+								<p>These are the 15 rules we obtained when sorted based on confidence. We can see that all of the top 15 rules have 1 for confidence. This means that whenever lhs appeared, rhs also appeared. for example, when rice was present, declan was also there in the same tweet. Lot of these rules seem to be names of players as often their full names are used in tweets. We can even see that the count is 2. which is very low as we have 300 tweets. Below are the visualizations for the rules.</p>
+								<img src="images/armConf1.JPG" >
+								<img src="images/armConf2.JPG" >
+							</br></br>
+								<h3>Rules for lift:</h3>
+								<img src="images/liftRules.JPG" >
+								<p>These are the 15 rules we obtained when sorted based on Lift. We have very high lift for these rules. It is because the support percentages are so low being 0.0066, and when substituted in our formula we get lift as 150. The count again is very low for these rules. From the visualizations we can make out that tuesday in stoke will be cold and rainy.  </p>
+								<img src="images/armLift1.JPG" >
+								<img src="images/armLift2.JPG" >
+							</br></br>
+								<h2>Conclusion:</h2>
+								<p>After taking a look at the results, we can observe that rules evaluated by support gives us the best information. Though the support and lift were high the sample was too low for it to mean anything. These tweets mostly speak for the end of month of september 2022. We can see some of the trending topics for football in UK.</br>
+								As premier league was halted for more than 3 weeks due to the loss of queen elizabeth and the following international break for football, people seem to be hyped about premier league. Champions league is also trending as it will resume from the first week of october. The tweets is also talking about the season so far and a few records set by different teams.</br>
+								Queen elizabeth has also appeared many times in tweets releated to football because many of the famous players, managers have paid their respects, tribute to the late queen of england. This news has made it into the tweets.</br>
+								Erling haaland is another name that has frequently appeared. He was one of the new additions to the squad of manchester city, and is already in the top of the scoring charts with 11 goals to his name. We can also see the word stop associated with haaland, referring to whether his scoring form can be stopped by other teams.</br>
+								From this data which was gathered from espn Uk tweets we can observe that most of the trending stuff in england is related to football. Grand slam which is related to tennis was also found in the tweets but with a very low count of 2. Currently in UK, premier league, champions league and erling haaland are the top 3 most happening topics for football. We may see these three names being mentioned in many news sources.</p>
+							</section>
+
+					</div>
+
+				
+
+				<!-- Copyright -->
+					<div id="copyright">
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery2.min.js"></script>
+			<script src="assets/js/jquery.scrollex2.min.js"></script>
+			<script src="assets/js/jquery.scrolly2.min.js"></script>
+			<script src="assets/js/browser2.min.js"></script>
+			<script src="assets/js/breakpoints2.min.js"></script>
+			<script src="assets/js/util2.js"></script>
+			<script src="assets/js/main2.js"></script>
+
+	</body>
+</html>
