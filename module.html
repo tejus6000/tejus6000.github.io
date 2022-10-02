@@ -141,13 +141,25 @@
 
 		df['content'] = tweetClean
 
+		# for transaction data we dont need the keyword column, so lets drop it
+		df.drop(['keyword'], axis=1, inplace=True)
+		
+		# We shall split each word in a tweet with a comma
+		for i in range(len(df)):
+		    df['content'][i] = df['content'][i].split()
+		    df['content'][i] = ','.join(df['content'][i])
+		
+		# this line places each word seperated by a comma in a seperate column
+		df = df['content'].str.split(",",expand=True)
+		
+
 		# we now save the data frame as a csv file in our pc.
 		df.to_csv('TwitterApiCSV.csv', index=False)
 									
 								</textarea>
 							
 							<p></br>after running the code you should have a csv file in this format: <a href="TwitterApiCSV.csv">Cleaned Tweets</a> </p>
-							<p> <img src="images/twitterCSV.JPG" ></p>
+							<p> <img src="images/TweetClean.JPG" ></p>
 					</div>
 				</div>
 			</section>
