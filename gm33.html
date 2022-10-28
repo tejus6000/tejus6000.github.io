@@ -47,7 +47,7 @@
 								<h2>Analyses: SVM</h2>
 								<h3>Data preprocessing:</h3>
 								<img src="images/module3/dtCleanData.JPG" >
-								<p></p>
+								<p>We have used the cleaned EA FIFA data that we obtained from the decision trees section. We will use this to see how support vector machine performs.</p>
 							<h2>Coding:</h2>
 								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
 # importing libraries
@@ -127,24 +127,22 @@ print("\nconfusion matrix with radial kernel\n",cm3)
 								</textarea>
 								</br>
 								<h2>Results:</h2>
-								<h3>Rules for support:</h3>
 								<img src="images/module3/svmViz1.JPG" >
-								<p>These are the 15 rules we obtained when sorted based on support. The highest support percentage is 12.9%, so the tweets we gathered have varied words and very less repeating words. In our sample of 300 tweets, we can see that most of the tweets are about premier league, queen elizabeth and erling haaland. </p>
+								<p>The matrix shows three key clusters most likey they are attackers, goalkeepers and defenders. So key skills can be usefull because they show clusters and can help the model to classify. But again we can see that midfielders stats vary so much that there is no clear cluter for them.</p>
 								<img src="images/module3/svmViz2.JPG" >
+								<p>Looking at the matrix using physical attributes that are common for most athletes, we can see the lack of cluster division.</p>
 							</br></br>
-								<h3>Rules for confidence:</h3>
+								
+								<p>These are the confusion matrix we obtained from using different kernels</p>
+								<img src="images/module3/svmLK.JPG" >
+								<p>Model accuracy : 0.861</p>
 								<img src="images/module3/svmRL.JPG" >
-								<p>These are the 15 rules we obtained when sorted based on confidence. We can see that all of the top 15 rules have 1 for confidence. This means that whenever lhs appeared, rhs also appeared. for example, when rice was present, declan was also there in the same tweet. Lot of these rules seem to be names of players as often their full names are used in tweets. We can even see that the count is 2. which is very low as we have 300 tweets. Below are the visualizations for the rules.</p>
-								<img src="images/module3/svmRP.JPG" ><br>
+								<p>Model accuracy : 0.854</p>
 								<img src="images/module3/svmRK.JPG" >
-							
+								<p>Model accuracy : 0.865</p>
 							</br></br>
 								<h2>Conclusion:</h2>
-								<p>After taking a look at the results, we can observe that rules evaluated by support gives us the best information. Though the support and lift were high the sample was too low for it to mean anything. These tweets mostly speak for the end of month of september 2022. We can see some of the trending topics for football in UK.</br>
-								As premier league was halted for more than 3 weeks due to the loss of queen elizabeth and the following international break for football, people seem to be hyped about premier league. Champions league is also trending as it will resume from the first week of october. The tweets is also talking about the season so far and a few records set by different teams.</br>
-								Queen elizabeth has also appeared many times in tweets releated to football because many of the famous players, managers have paid their respects, tribute to the late queen of england. This news has made it into the tweets.</br>
-								Erling haaland is another name that has frequently appeared. He was one of the new additions to the squad of manchester city, and is already in the top of the scoring charts with 11 goals to his name. We can also see the word stop associated with haaland, referring to whether his scoring form can be stopped by other teams.</br>
-								From this data which was gathered from espn Uk tweets we can observe that most of the trending stuff in england is related to football. Grand slam which is related to tennis was also found in the tweets but with a very low count of 2. Currently in UK, premier league, champions league and erling haaland are the top 3 most happening topics for football. We may see these three names being mentioned in many news sources.</p>
+								<p>Using the same clean FIFA data that we used on other supervised classifiers, we can observe that support vector classifiers performed the best. From the visualizations we can again confirm our hypothesis that midfielders have a wide range of stats and it can be dificult to predict them. But SVM performed much better in predicting them and got a higher accuracy of 86% when compared to other classifiers.</p>
 							</section>
 
 					</div>

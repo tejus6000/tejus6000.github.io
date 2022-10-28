@@ -45,6 +45,10 @@
 								<h2>Analyses: Naive Bayes</h2>
 								<h3>Data preprocessing:</h3>
 								<img src="images/module3/dtCleanData.JPG" >
+								<p>We are using the cleaned FIFA data that we obtained after cleaning the raw FIFA file from the last section. We will see how naive bayes classifies the data and if the accuracy is better.</p>
+								<img src="images/module3/dtrCleandata.JPG" >
+								<p>We will also use the cleaned premier league season 2020-21 data and check if naive bayes performs better.</p>
+
 							</br></br>
 							<h2>Coding:</h2>
 								<h3><br>Naive Bayes in Python</h3>
@@ -181,23 +185,29 @@ table(nb_pred,Y_test$result)
 								<h2>Results:</h2>
 								<h3>Rules for support:</h3>
 								<img src="images/module3/nbViz1.JPG" >
-								<p>These are the 15 rules we obtained when sorted based on support. The highest support percentage is 12.9%, so the tweets we gathered have varied words and very less repeating words. In our sample of 300 tweets, we can see that most of the tweets are about premier league, queen elizabeth and erling haaland. </p>
-								<img src="images/module3/nbViz2.JPG" >
+								<p>by plotting the boxplot for the finishing skill, we can see that it is  a key skill for attackers.  </p>
+ 								<img src="images/module3/nbViz2.JPG" >
+								<p>The boxplot for the SlidingTackle shows that it is  a key skill for defenders. In both the boxplots we can see that the midfielders boxplots whiskers span higher, this says that there are some midfielders who are specialists in attacking and defending. </p>
+
 								<br>
 								<img src="images/module3/nbCM.JPG" >
+								<p>This is the confusion matrix we obtained after running our naive bayes model on the dataset.<br>
+								We got an accuracy of 77.12%</p>
 							</br></br>
-								<h3>Rules for confidence:</h3>
+								
 								<img src="images/module3/nbrViz1.JPG" >
-								<p>These are the 15 rules we obtained when sorted based on confidence. We can see that all of the top 15 rules have 1 for confidence. This means that whenever lhs appeared, rhs also appeared. for example, when rice was present, declan was also there in the same tweet. Lot of these rules seem to be names of players as often their full names are used in tweets. We can even see that the count is 2. which is very low as we have 300 tweets. Below are the visualizations for the rules.</p>
-								<img src="images/module3/nbrViz2.JPG" > <br>
+								<p>For the 2020-21 season data we can see that away team has won more times than the home team.</p>
+								<img src="images/module3/nbrViz2.JPG" >
+								<p>This barplot shows the results of all teams from the 38 matches they played. We can see that manchester city have had the highest number of wins and sheffield united have had the highest number of losses. This info can be usefull for model for predicting head to head matches.  </p> <br>
 								<img src="images/module3/nbrCM.JPG" >
+								<p>This is the confusion matrix we obtained after running our model on the premier league data.<br>
+								We got an accuracy of 64.37%</p>
 							</br></br>
 								<h2>Conclusion:</h2>
-								<p>After taking a look at the results, we can observe that rules evaluated by support gives us the best information. Though the support and lift were high the sample was too low for it to mean anything. These tweets mostly speak for the end of month of september 2022. We can see some of the trending topics for football in UK.</br>
-								As premier league was halted for more than 3 weeks due to the loss of queen elizabeth and the following international break for football, people seem to be hyped about premier league. Champions league is also trending as it will resume from the first week of october. The tweets is also talking about the season so far and a few records set by different teams.</br>
-								Queen elizabeth has also appeared many times in tweets releated to football because many of the famous players, managers have paid their respects, tribute to the late queen of england. This news has made it into the tweets.</br>
-								Erling haaland is another name that has frequently appeared. He was one of the new additions to the squad of manchester city, and is already in the top of the scoring charts with 11 goals to his name. We can also see the word stop associated with haaland, referring to whether his scoring form can be stopped by other teams.</br>
-								From this data which was gathered from espn Uk tweets we can observe that most of the trending stuff in england is related to football. Grand slam which is related to tennis was also found in the tweets but with a very low count of 2. Currently in UK, premier league, champions league and erling haaland are the top 3 most happening topics for football. We may see these three names being mentioned in many news sources.</p>
+								<p>
+									We can see from the results that our model was able to predict the correct position of a player only 77% of times. This again proves our hypothesis that it is difficult for our model to classify some midfielders correctly. Their stats might be very similar to that of an attacker or defender thus making it difficult for the model to classify them accurately. 
+								</p>
+								<p>Looking at the premier league 2020-21 season, we have again got a low accuracy of 64%. This is given because of the nature of the game. But, we can also observe that the accuracy for naive bayes is significantly higher than what we got from decision trees, which was only 52%. Therefore Naive bayes performed much better on this data.</p>
 							</section>
 
 					</div>
