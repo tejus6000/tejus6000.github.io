@@ -1,0 +1,496 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Clustering</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main2.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript2.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Home</a>
+						
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="module3.html">Introduction</a></li>
+							<li class="active"><a href="gm31.html">Decision Trees</a></li>
+							<li><a href="gm32.html">Naive Bayes</a></li>
+							<li><a href="gm33.html">SVM</a></li>
+							
+						</ul>
+						
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									
+									<h2>Decision Trees</h2>
+								</header>
+								<h2>analyses: Decision Trees</h2>
+								<h3>Data preprocessing:</h3>
+								<img src="images/module3/dtRawData.JPG" >
+								<p>This data was obtained from kaggle which has the details of the stats of all players. The stats where generated from the game EA FIFA. There are a wide range of stats and even the minute details are specified. We shall go through the raw data and remove some columns. We shall only keep the columns that will be usefull for us to classify the players into different positions. </p>
+								<img src="images/module3/dtCleanData.JPG" >
+								<p>After cleaning we will obtain a dataset like this, then we can perform further analysis and use our models on this data</p>
+								<img src="images/module3/dtDisData.JPG" >
+								<p>We have used the clean FIFA data and discretized the columns, to check if it has an effect on the results for decision trees.</p>								
+								
+								
+								<img src="images/module3/dtrRawdata.JPG" >
+								<p>This dataset contains details of all matches that have taken place in the premier league 2020-21 season and half of the matches from the 2021-22 season. We will be focussing on the 2020-2021 season.</p>
+								<img src="images/module3/dtrCleandata.JPG" >
+								<p>After going through the dataset some columns which where not so important, like the day the match took place, the time it took place and some other factors like penalty kicks and free kicks which are less significant in predicting the outcome are removed. Once we do that we will get an output dataset like the one shown above.</p>
+								<h2>Coding:</h2>
+								<h3><br>Decision Trees in Python</h3>
+
+								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+#importing Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.model_selection import cross_val_score
+from sklearn.tree import export_graphviz
+from IPython.display import Image 
+
+# loading the raw dataset
+df = pd.read_csv('C:\\Users\\Mazino\\Desktop\\ML_Sem3\\module3\\fifaData\\players_22.csv', sep=',')
+
+# Viewing the data
+pd.set_option('display.max_columns', None)
+df.head(5)
+df.dtypes
+
+# dropping the unnecessary data
+df2 = df.drop(['player_url','long_name','age','player_positions','overall','potential','value_eur','wage_eur','dob','height_cm',
+               'weight_kg','club_team_id','club_name','league_name','league_level','club_jersey_number','club_loaned_from',
+               'club_joined','club_contract_valid_until','nationality_id','nationality_name','nation_team_id','nation_position',
+               'nation_jersey_number','preferred_foot','weak_foot','skill_moves','international_reputation','work_rate',
+               'body_type','real_face','release_clause_eur','player_tags','player_traits','goalkeeping_diving',
+               'goalkeeping_handling','goalkeeping_kicking','goalkeeping_positioning','goalkeeping_reflexes',
+               'goalkeeping_speed','ls','st','rs','lw','lf','cf','rf','rw','lam','cam','ram','lm','lcm','cm','rcm','rm','lwb',
+               'ldm','cdm','rdm','rwb','lb','lcb','cb','rcb','rb','gk','player_face_url','club_logo_url','club_flag_url',
+               'nation_logo_url','nation_flag_url','pace','shooting','passing','dribbling','defending','physic'], axis = 1)
+
+# now we obtain the data with columns we need
+df2.head(5)
+df2.shape
+df2.dtypes
+# checking for null values
+df2.isnull().sum()
+
+# drop the rows with missing values since there are very few rows with missing values
+df2 = df2.dropna()
+df2.isnull().sum()
+
+# lets check the different types of positions
+df2.club_position.value_counts()
+
+# we decide to drop the substitute and reserve players as we don't know their position on pitch
+dropPlayers = df2[ (df2['club_position'] == 'SUB') | (df2['club_position'] == 'RES')].index
+df2.drop(dropPlayers, inplace=True)
+
+# forming four major positions from the various positions
+att = dict.fromkeys(['ST', 'LW', 'RW', 'LS', 'RS', 'CF', 'RF', 'LF'], 'attacker')
+mid = dict.fromkeys(['CM', 'RM', 'LM', 'CAM', 'CDM', 'LCM', 'RCM', 'RDM', 'LDM', 'RAM', 'LAM'], 'midfielder')
+dfnc = dict.fromkeys(['CB', 'LB', 'RB', 'RCB', 'LCB', 'RWB', 'LWB' ], 'defender')
+df2.club_position.replace('GK', 'goalkeeper', inplace=True)
+df2.club_position.replace(att, inplace=True)
+df2.club_position.replace(mid, inplace=True)
+df2.club_position.replace(dfnc, inplace=True)
+
+# Confirm the changes
+df2.club_position.value_counts()
+df2.duplicated('sofifa_id').sum()
+
+# let's look at some visualizations
+
+df2.club_position.value_counts().plot(kind = 'pie',
+                                autopct = '%0.1f%%',
+                                shadow = True,
+                                cmap = 'Set3'
+                                )
+plt.title('Position Representation\n', fontsize = 16 )
+plt.xlabel('')
+plt.ylabel('')
+plt.axis('equal')
+plt.show()
+
+sns.scatterplot(x = "attacking_finishing", 
+                y = "attacking_heading_accuracy", 
+                hue = "club_position", 
+                data = df2,
+                )
+plt.title('HeadingAccuracy Vs Finishing by Position', fontsize = 14)
+plt.show()
+
+sns.scatterplot(x = "defending_sliding_tackle", 
+                y = "defending_standing_tackle", 
+                hue = "club_position", 
+                data = df2,
+                )
+plt.title('StandingTackle Vs SlidingTackle by Position', fontsize = 14)
+plt.show()
+
+# selecting the feature cols
+feature_cols = ['attacking_crossing','attacking_finishing','attacking_heading_accuracy','attacking_short_passing',
+                'attacking_volleys','skill_dribbling','skill_curve','skill_fk_accuracy','skill_long_passing','skill_ball_control',
+                'movement_acceleration','movement_sprint_speed','movement_agility','movement_reactions','movement_balance',
+                'power_shot_power','power_jumping','power_stamina','power_strength','power_long_shots','mentality_aggression',
+                'mentality_interceptions','mentality_positioning','mentality_vision','mentality_penalties','mentality_composure',
+                'defending_marking_awareness','defending_standing_tackle','defending_sliding_tackle' ]
+
+# Assign the feature data
+X = df2[feature_cols]
+
+# Assign the outcomes
+y = df2.club_position
+
+# Split into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1984)
+
+# Build the Decision Tree Model
+clf = DecisionTreeClassifier(criterion = 'gini', # Default gini
+                             max_features = None, # Default None
+                             max_depth = None, # Default None
+                             min_samples_split = 2, # Default 2
+                             min_samples_leaf = 1 # Default 1 
+                             )
+
+# Train the model on the training set
+fit = clf.fit(X_train, y_train)
+
+# Test the model on the test set
+y_pred = fit.predict(X_test)
+
+# Build a confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Cross Validate the model with 10 folds
+cv_scores = cross_val_score(clf, X, y, cv=10)
+
+# Set the accuracy to a variable
+acc = metrics.accuracy_score(y_test, y_pred)
+
+# Set the error rate to a variable
+err = np.mean(y_pred != y_test)
+
+# Set the cross validation mean score to a variable
+cvm = np.mean(cv_scores)
+
+# Calculate the differece between the Accuracy and CV Accuracy
+dif = acc-cvm
+
+# Determine if model is underfitted or overfitted
+if dif < 0:
+    underover = "Underfitted"
+else:
+    underover = "Overfitted"
+
+# Set the model node count to a variable
+nds = clf.tree_.node_count
+
+print ("Model Accuracy: ",str(round(acc*100,2))+"%")
+print ("Cross Validation Accuracy: ",str(round(cvm*100,2))+"%")
+print ("Model Fitting: ",str(round(dif*100,2))+"%",underover)
+print ("Number of Nodes in Model: ",nds)
+print ("Error Rate: ",str(round(err*100, 2))+"%")
+print ("\n\n\nConfusion Matrix for numerical data using gini: \n\n",cm)
+print ("\n\n\nClassification Report:\n\n",classification_report(y_test, y_pred))
+
+# Build the Decision Tree Model with entropy as criterion
+clf = DecisionTreeClassifier(criterion = 'entropy', 
+                             max_features = None, # Default None
+                             max_depth = None, # Default None
+                             min_samples_split = 2, # Default 2
+                             min_samples_leaf = 1 # Default 1 
+                             )
+
+# Train the model on the training set
+fit = clf.fit(X_train, y_train)
+
+# Test the model on the test set
+y_pred = fit.predict(X_test)
+
+# Build a confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Cross Validate the model with 10 folds
+cv_scores = cross_val_score(clf, X, y, cv=10)
+
+# Set the accuracy to a variable
+acc = metrics.accuracy_score(y_test, y_pred)
+
+# Set the error rate to a variable
+err = np.mean(y_pred != y_test)
+
+# Set the cross validation mean score to a variable
+cvm = np.mean(cv_scores)
+
+# Calculate the differece between the Accuracy and CV Accuracy
+dif = acc-cvm
+
+# Determine if model is underfitted or overfitted
+if dif < 0:
+    underover = "Underfitted"
+else:
+    underover = "Overfitted"
+
+# Set the model node count to a variable
+nds = clf.tree_.node_count
+
+print ("Model Accuracy: ",str(round(acc*100,2))+"%")
+print ("Cross Validation Accuracy: ",str(round(cvm*100,2))+"%")
+print ("Model Fitting: ",str(round(dif*100,2))+"%",underover)
+print ("Number of Nodes in Model: ",nds)
+print ("Error Rate: ",str(round(err*100, 2))+"%")
+print ("\n\n\nConfusion Matrix for numerical data with entropy: \n\n",cm)
+print ("\n\n\nClassification Report:\n\n",classification_report(y_test, y_pred))
+
+############################################################################################
+#####   Discretizing data #####
+
+# make a copy of the data
+df3 = df2.copy()
+columns = list(df3.columns)
+columns.remove("sofifa_id")
+columns.remove("short_name")
+columns.remove("club_position")
+print(columns)
+df3.dtypes
+
+# dicretizing the data
+for column in columns:
+    print(column)
+    df3[column] = np.where(((df3[column] >= 0) & (df3[column] <=25)),1,df3[column])
+    df3[column] = np.where(((df3[column] > 25) & (df3[column] <=50)),2,df3[column])
+    df3[column] = np.where(((df3[column] > 50) & (df3[column] <=75)),3,df3[column])
+    df3[column] = np.where(((df3[column] > 75) & (df3[column] <=100)),4,df3[column])
+
+df3.head(5)
+
+# selecting feature cols
+feature_cols = ['attacking_crossing','attacking_finishing','attacking_heading_accuracy','attacking_short_passing',
+                'attacking_volleys','skill_dribbling','skill_curve','skill_fk_accuracy','skill_long_passing','skill_ball_control',
+                'movement_acceleration','movement_sprint_speed','movement_agility','movement_reactions','movement_balance',
+                'power_shot_power','power_jumping','power_stamina','power_strength','power_long_shots','mentality_aggression',
+                'mentality_interceptions','mentality_positioning','mentality_vision','mentality_penalties','mentality_composure',
+                'defending_marking_awareness','defending_standing_tackle','defending_sliding_tackle' ]
+
+# Assign the feature data
+X = df3[feature_cols]
+
+# Assign the outcomes
+y = df3.club_position
+
+# Split into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1984)
+
+# Build the Decision Tree Model
+clf = DecisionTreeClassifier(criterion = 'gini', # Default gini
+                             max_features = None, # Default None
+                             max_depth = None, # Default None
+                             min_samples_split = 2, # Default 2
+                             min_samples_leaf = 1 # Default 1 
+                             )
+
+# Train the model on the training set
+fit = clf.fit(X_train, y_train)
+
+# Test the model on the test set
+y_pred = fit.predict(X_test)
+
+# Build a confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Cross Validate the model with 10 folds
+cv_scores = cross_val_score(clf, X, y, cv=10)
+
+# Set the accuracy to a variable
+acc = metrics.accuracy_score(y_test, y_pred)
+
+# Set the error rate to a variable
+err = np.mean(y_pred != y_test)
+
+# Set the cross validation mean score to a variable
+cvm = np.mean(cv_scores)
+
+# Calculate the differece between the Accuracy and CV Accuracy
+dif = acc-cvm
+
+# Determine if model is underfitted or overfitted
+if dif < 0:
+    underover = "Underfitted"
+else:
+    underover = "Overfitted"
+
+# Set the model node count to a variable
+nds = clf.tree_.node_count
+
+print ("Model Accuracy: ",str(round(acc*100,2))+"%")
+print ("Cross Validation Accuracy: ",str(round(cvm*100,2))+"%")
+print ("Model Fitting: ",str(round(dif*100,2))+"%",underover)
+print ("Number of Nodes in Model: ",nds)
+print ("Error Rate: ",str(round(err*100, 2))+"%")
+print ("\n\n\nConfusion Matrix for discretized data: \n\n",cm)
+print ("\n\n\nClassification Report:\n\n",classification_report(y_test, y_pred))
+
+								</textarea>
+								<h2><br><br>Decision Trees in R</h2>
+
+								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+
+## LIBRARIES
+library(rpart)   ## FOR Decision Trees
+library(rattle)  ## FOR Decision Tree Vis
+library(rpart.plot)
+library(RColorBrewer)
+library(Cairo)
+library(network)
+library(ggplot2)
+library(wordcloud)
+library(dplyr)
+library(slam)
+library(quanteda)
+library(proxy)
+library(stringr)
+library(textmineR)
+library(igraph)
+
+# reading in the raw data
+match=read.csv("C:\\Users\\Mazino\\Desktop\\TwitterMining\\pl\\2021_22\\matches.csv")
+View(match)
+
+# filtering the data to get results for 2020-2021 season
+m2021 <- match %>% filter(date < '2021-07-01')
+m2021 %>% count(team)
+summary(m2021)
+
+# removing some unnecessary columns
+m2021 <- subset(m2021, select = -c(X,time,comp,round,day,attendance,captain,formation,referee,match.report,notes,season,fk,pk,pkatt,dist,gf,ga))
+
+# Visualizations of the clean data
+
+m2021 %>%
+  ggplot(aes(reorder(team, -(result=="W")),result == "W"))+
+  geom_col(fill = "mediumspringgreen") +
+  labs(x="team",y = "wins", title="Number of wins by team") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+m2021 %>%
+  ggplot(aes(reorder(team, -(result=="L")),result == "L"))+
+  geom_col(fill = "lightcoral") +
+  labs(x="team",y = "Lost", title="Number of losses by team") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+
+m2021 %>%
+  ggplot(aes(reorder(team, -(result=="D")),result == "D"))+
+  geom_col(fill = "lightblue3") +
+  labs(x="team",y = "Draw", title="Number of draws by team") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+# splitting the data into train and test data and storing the labels 
+X_train <- m2021 %>% filter(date < '2021-04-07')
+Y_train <- m2021 %>% filter(date < '2021-04-07') %>% select(result)
+X_test <- m2021 %>% filter(date > '2021-04-07')
+Y_test <- m2021 %>% filter(date > '2021-04-07') %>% select(result)
+
+# removing the date and label column from test and train data
+X_train <- subset(X_train, select = -c(date,result))
+X_test <- subset(X_test, select = -c(date,result))
+
+# running decision tree model on the train data
+tree<-rpart(Y_train$result ~ ., data = X_train, method ="class")
+summary(tree)
+
+# performing the prediction and obtaining the confusion matrix
+(prediction <- predict(tree, X_test, type="class"))
+
+table(prediction, Y_test$result)
+								</textarea>
+							 	</br></br>
+								<h3>Results:</h3>
+								<img src="images/module3/dtViz1.JPG" >
+								<p>We used pie chart to explore the percentage representation of positions in the dataset. Midfielders and defenders have the most representation. This is expected given Midfielders play various roles in football such as attacking and defending roles, and defenders have many roles as well like wing backs, center backs. Goalkeepers and Attackers were the least represented. </p>
+								</br>
+								<img src="images/module3/dtViz2.JPG" >
+								<p>Heading accuracy and finishing are skills which are the speciality of attckers. These features may be important for opur model in determing the posiotions. We can see that clear clusters are being formed, so this should help the performance of our model. </p>
+								</br><img src="images/module3/dtViz3.JPG" >
+								<p>StandingTackle and SlidingTackle are skills which are the speciality of defenders. We can see that clear clusters are being formed, so these features can help boost the performance of our model. </p>
+								</br>
+								<img src="images/module3/dtCFng.JPG" >
+								<p>This is the confusion matrix we obtained after running our decision tree model <br>
+								We got an accuracy of 77.12% </p>
+								</br>
+								<img src="images/module3/dtCFne.JPG" >
+								<p>This is the confusion matrix we obtained after running our decision tree model using criterion as entropy <br>
+									We got an accuracy of 77.77% </p>								</br>
+								<img src="images/module3/dtCFd.JPG" >
+								<p>This is the confusion matrix we obtained after running our decision tree model on the discretized dataset <br>
+									We got an accuracy of 73.56% </p>									</br>
+								<img src="images/module3/dtrViz1.JPG" >
+								<p>This image is a visualization for the premier league 2020-2021 season. It shows the no.of wins by each team in decreasing order.</p>
+								</br>
+								<img src="images/module3/dtrViz2.JPG" >
+								<p>This image shows the number of losses by each team.</p>
+								</br>
+								<img src="images/module3/dtrViz3.JPG" >
+								<p>This image shows the number of draws by each team.</p>								</br>
+								<img src="images/module3/dtrCF.JPG" >
+								<p>This is the confusion matrix we obtained after running our decision tree model.<br>
+								We got an accuracy of 51.87%</p>
+								</br></br>
+								<h3>Conclusion:</h3>
+								<p>From the results on the FIFA data we can see that our model accuracy was in the range of 70-80%. This can be expected because the stats of wingback defenders and defensive midfielders might be similar and the stats of attackers and attacking midfielders can be similar.</p>
+								<p>We can see that the results does not vary much when we use gini or entropy. Gini criterion is much faster as it is less computatiuonally expensive. with entropy we got a slightly better result, but it seems to be not worth it as it uses more time in computing. </p>
+								<p>Looking at the premier league season data results we can observe that we got a low accuracy of 52%. This was expected to happen beacuse predicting the outcome of a football match is very difficult. The probabilities of win, loss and draw might be more usefull information for a viewer. Predicting the final output will be difficult because as mentioned before, football games can have many unpredictables outcomes. </p>
+							
+							
+							</section>
+
+					</div>
+
+				
+
+				<!-- Copyright -->
+					<div id="copyright">
+
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery2.min.js"></script>
+			<script src="assets/js/jquery.scrollex2.min.js"></script>
+			<script src="assets/js/jquery.scrolly2.min.js"></script>
+			<script src="assets/js/browser2.min.js"></script>
+			<script src="assets/js/breakpoints2.min.js"></script>
+			<script src="assets/js/util2.js"></script>
+			<script src="assets/js/main2.js"></script>
+
+	</body>
+</html>
