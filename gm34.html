@@ -1,0 +1,292 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>NN</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main2.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript2.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Home</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="module3.html">Introduction</a></li>
+							<li><a href="gm31.html">Decision Trees</a></li>
+							<li><a href="gm32.html">Naive Bayes</a></li>			
+							<li><a href="gm33.html">SVM</a></li>
+							<li class="active"><a href="gm34.html">NN</a></li>
+							
+						</ul>
+						
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1>Neural Networks
+									</h1>
+								</header>
+								<h2>Analyses: NN</h2>
+								<p>Neural networks are a method in artificial intelligence that teaches computers to process data. It reflects the behavior of a human brain which allows computers to recognize patterns and use it to solve machine learning problems. Neural networks are comprised of node layers. They contain an input layer, and an output layer with one or more hidden layers in between. The nodes are connected to other nodes, and they have a weight and threshold associated with them. Each node performs a task and provides an output. This output is then passed through an activation function, which determines the output. If that output exceeds the threshold, then it is passed on to the next layer as an input. </p>
+								<p>For our project we will use the premier league data, which contains information about the matches between different teams and their outcomes. For this we shall assign a code to each team since we need numerical value for the NN model. Using this we shall try to make a basic prediction on the outcome and see how the NN model performs. </p>
+								<h3>Dataset:</h3>
+								<img src="images/module3/data1.JPG" >
+								<h2>Coding:</h2>
+								<textarea id="code" name="w3review" readonly="readonly" style="text-align:left ; font-size: medium;">
+# importing libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import preprocessing
+
+# loading the data
+inputData = pd.read_csv("C:\\Users\\Mazino\\Desktop\\TwitterMining\\pl\\2021_22\\m2021.csv")
+inputData.head(5)
+df = inputData[(inputData['date'] < '2021-07-01')]
+
+#setting codes to home and away teams
+df["opp_code"] = df["opponent"].astype("category").cat.codes
+df["opp_code"]
+
+df["home_code"] = df["team"].astype("category").cat.codes
+df["home_code"]
+
+mapping = {'L' : 0, 'W' : 1 , 'D' : 0}
+df = df.replace({'result':mapping})
+
+# selecting necessary columns
+df2 = df[["result","home_code","opp_code"]]
+
+# storing the results in y
+y=df2.iloc[:,0]
+y=np.array([y])
+y=y.T
+print(y)
+
+# normalizing the feature variables
+xdf = df2
+xdf=(xdf-xdf.min())/(xdf.max()-xdf.min())
+
+X = xdf.iloc[:,1:4]
+X = np.array(X)
+print(X)
+
+InputColumns = 3
+NumberOfLabels = 2
+n = len(df2) ## number of rows of entire X
+
+# learning rates
+LR=.01
+LRB = .01
+
+class NeuralNetwork(object):
+    def __init__(self):
+        
+        self.InputNumColumns = InputColumns  ## columns
+        self.OutputSize = 1 ## Categories
+        self.HiddenUnits = 4  ## one layer with h units
+        self.n = n  ## number of training examples, n
+        
+        print("Initialize NN\n")
+        #Random W1
+        self.W1 = np.random.randn(self.InputNumColumns, self.HiddenUnits) # c by h  
+       
+        print("INIT W1 is\n", self.W1)
+        
+        ##-----------------------------------------
+        ## NOTE ##
+        ##
+        ## The following are all random. However, you can comment this out
+        ## and can set any weights and biases by hand , etc.
+        ##
+        ##---------------------------------------------
+        
+        self.W2 = np.random.randn(self.HiddenUnits, self.OutputSize) # h by o 
+        print("W2 is:\n", self.W2)
+        
+        self.b = np.random.randn(1, self.HiddenUnits)
+        print("The b's are:\n", self.b)
+        ## biases for layer 1
+        
+        self.c = np.random.randn(1, self.OutputSize)
+        print("The c is\n", self.c)
+        ## bias for last layer
+        
+        
+    def FeedForward(self, X):
+        print("FeedForward\n\n")
+        self.z = (np.dot(X, self.W1)) + self.b 
+        #X is n by c   W1  is c by h -->  n by h
+        print("Z1 is:\n", self.z)
+        
+        self.h = self.Sigmoid(self.z) #activation function    shape: n by h
+        print("H is:\n", self.h)
+        
+        self.z2 = (np.dot(self.h, self.W2)) + self.c # n by h  @  h by o  -->  n by o  
+        print("Z2 is:\n", self.z2)
+        
+        ## Using Softmax for the output activation
+        output = self.Sigmoid(self.z2)  
+        print("output Y^ is:\n", output)
+        return output
+        
+    def Sigmoid(self, s, deriv=False):
+        if (deriv == True):
+            return s * (1 - s)
+        return 1/(1 + np.exp(-s))
+    
+    # def Softmax(self, M):
+    #     #print("M is\n", M)
+    #     expM = np.exp(M)
+    #     #print("expM is\n", expM)
+    #     SM=expM/np.sum(expM, axis=1)[:,None]
+    #     #print("SM is\n",SM )
+    #     return SM 
+    
+    def BackProp(self, X, y, output):
+        print("\n\nBackProp\n")
+        self.LR = LR
+        self.LRB=LRB  ## LR for biases
+        
+        # Y^ - Y, loss function
+        self.output_error = output - y    
+        print("Y^ - Y\n", self.output_error)
+        
+        self.output_delta = self.output_error 
+          
+        
+        ##(Y^ - Y)(W2)
+        #  D_Error times W2, w2 is h x o and output is n x o, so we transpose w2
+        self.D_Error_W2 = self.output_delta.dot(self.W2.T)
+        #print("W2 is\n", self.W2)
+        #print(" D_Error times W2\n", self.D_Error_W2)
+        
+        ## (H)(1 - H) (Y^ - Y)(Y^)(1-Y^)(W2)
+        ## We still use the Sigmoid on H
+        
+        self.H_D_Error_W2 = self.D_Error_W2 * self.Sigmoid(self.h, deriv=True) 
+        
+        ## Note that * will multiply respective values together in each matrix
+        #print("Derivative sig H is:\n", self.Sigmoid(self.h, deriv=True))
+        #print("self.H_D_Error_W2 is\n", self.H_D_Error_W2)
+        
+        ################------UPDATE weights and biases ------------------
+        #print("Old W1: \n", self.W1)
+        #print("Old W2 is:\n", self.W2)
+        #print("X transpose is\n", X.T)
+        
+        ##  XT  (H)(1 - H) (Y^ - Y)(Y^)(1-Y^)(W2)
+        # derivatives for w1
+        self.X_H_D_Error_W2 = X.T.dot(self.H_D_Error_W2) ## this is dW1
+        
+        ## (H)T (Y^ - Y) - 
+        # derivatives for w2
+        self.h_output_delta = self.h.T.dot(self.output_delta) ## this is for dW2
+        
+        #print("the gradient :\n", self.X_H_D_Error_W2)
+        #print("the gradient average:\n", self.X_H_D_Error_W2/self.n)
+        
+        print("Using sum gradient........\n")
+        self.W1 = self.W1 - self.LR*(self.X_H_D_Error_W2) # c by h  adjusting first set (input -> hidden) weights
+        self.W2 = self.W2 - self.LR*(self.h_output_delta) 
+        
+        
+        print("The sum of the b update is\n", np.mean(self.H_D_Error_W2, axis=0))
+        print("The b biases before the update are:\n", self.b)
+        self.b = self.b  - self.LRB*np.mean(self.H_D_Error_W2, axis=0)
+        #print("The H_D_Error_W2 is...\n", self.H_D_Error_W2)
+        print("Updated bs are:\n", self.b)
+        
+        self.c = self.c - self.LR*np.mean(self.output_delta, axis=0)
+        #print("Updated c's are:\n", self.c)
+        
+        print("The W1 is: \n", self.W1)
+        print("The W1 gradient is: \n", self.X_H_D_Error_W2)
+        #print("The W1 gradient average is: \n", self.X_H_D_Error_W2/self.n)
+        print("The W2 gradient  is: \n", self.h_output_delta)
+        #print("The W2 gradient average is: \n", self.h_output_delta/self.n)
+        print("The biases b gradient is:\n",np.mean(self.H_D_Error_W2, axis=0 ))
+        print("The bias c gradient is: \n", np.mean(self.output_delta, axis=0))
+        ################################################################
+        
+    def TrainNetwork(self, X, y):
+        output = self.FeedForward(X)
+        print("Output in TNN\n", output)
+        self.BackProp(X, y, output)
+        return output
+
+# starting NN
+MyNN = NeuralNetwork()
+
+TotalLoss=[]
+AvgLoss=[]
+Epochs=100
+
+# running nn in a loop
+for i in range(Epochs): 
+    print("\nRUN:\n ", i)
+    output=MyNN.TrainNetwork(X, y)
+   
+    #print("The y is ...\n", y)
+    print("The output is: \n", output)
+    output=np.where(output > 0.5, 1, 0)
+    print('Prediction y^ is', output)
+    ## Using Categorical Cross Entropy...........
+    #loss = np.mean(-y * np.log(output))  ## We need y to place the "1" in the right place
+    loss=np.sum(np.square(output-y))
+    avgLoss=np.mean(np.square(output-y))
+    print("The current average loss is\n", avgLoss)
+    TotalLoss.append(loss)
+    AvgLoss.append(avgLoss)
+
+# getting the confusion matrix	
+print(confusion_matrix(output, y))
+								</textarea>
+								</br>
+								<h2>Conclusion:</h2>
+								<p>Confusion Matrix:</p>
+								<img src="images/module3/cm.JPG" >
+								<p>After running the NN we get an accuracy of 57%. Which is quite low, we could have improved this by using more complex neural networks with more variables. Just using the teams and the results between them doesn’t give our model too much information, and in each season two teams face each other only twice so there is very little information. If the two matches were won by both the teams in different occasion, then there is only 50% chance that our model can predict the output. We should consider using data from previous seasons and some stats of the teams to get higher accuracy.</p>
+								
+								
+							</section>
+
+					</div>
+
+				
+
+				<!-- Copyright -->
+					<div id="copyright">
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery2.min.js"></script>
+			<script src="assets/js/jquery.scrollex2.min.js"></script>
+			<script src="assets/js/jquery.scrolly2.min.js"></script>
+			<script src="assets/js/browser2.min.js"></script>
+			<script src="assets/js/breakpoints2.min.js"></script>
+			<script src="assets/js/util2.js"></script>
+			<script src="assets/js/main2.js"></script>
+
+	</body>
+</html>
